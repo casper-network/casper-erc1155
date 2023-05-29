@@ -1,8 +1,8 @@
 // use once_cell::sync::Lazy;
 
 // use casper_engine_test_support::{
-//     ExecuteRequestBuilder, InMemoryWasmTestBuilder, DEFAULT_RUN_GENESIS_REQUEST,
-//     DEFAULT_ACCOUNT_ADDR, MINIMUM_ACCOUNT_CREATION_BALANCE,
+//     ExecuteRequestBuilder, InMemoryWasmTestBuilder, DEFAULT_ACCOUNT_ADDR,
+//     MINIMUM_ACCOUNT_CREATION_BALANCE, PRODUCTION_RUN_GENESIS_REQUEST,
 // };
 // use casper_execution_engine::core::{
 //     engine_state::{Error as CoreError, ExecuteRequest},
@@ -13,6 +13,10 @@
 //     ContractHash, ContractPackageHash, Key, PublicKey, RuntimeArgs, SecretKey, U256,
 // };
 
+// const ARG_SPENDER: &str = "spender";
+// const ARG_OWNER: &str = "owner";
+// const TOKEN_SYMBOL: &str = "CSPRT";
+// const TOKEN_TOTAL_SUPPLY: u64 = 1_000_000_000;
 // const EXAMPLE_ERC1155_TOKEN: &str = "erc1155_token.wasm";
 // const CONTRACT_ERC1155_TEST: &str = "erc1155_test.wasm";
 // const CONTRACT_ERC1155_TEST_CALL: &str = "erc1155_test_call.wasm";
@@ -41,6 +45,7 @@
 // const CHECK_BALANCE_OF_ENTRYPOINT: &str = "check_balance_of";
 // const CHECK_BALANCE_OF_BATCH_ENTRYPOINT: &str = "check_balance_of_batch";
 // const CHECK_IS_APPROVAL_FOR_ALL_ENTRYPOINT: &str = "check_is_approval_for_all";
+// const CHECK_TOTAL_SUPPLY_ENTRY_POINT_NAME: &str = "check_total_supply";
 // const ARG_TOKEN_CONTRACT: &str = "token_contract";
 // const ARG_ADDRESS: &str = "address";
 // const RESULT_KEY: &str = "result";
@@ -58,7 +63,7 @@
 //     Lazy::new(|| PublicKey::from(&*ACCOUNT_2_SECRET_KEY));
 // static ACCOUNT_2_ADDR: Lazy<AccountHash> = Lazy::new(|| ACCOUNT_2_PUBLIC_KEY.to_account_hash());
 
-// const TRANSFER_AMOUNT_1: u64 = 11550_001;
+// const TRANSFER_AMOUNT_1: u64 = 11_550_001;
 // const TRANSFER_AMOUNT_2: u64 = 19_999;
 // const ALLOWANCE_AMOUNT_1: u64 = 456_789;
 // const ALLOWANCE_AMOUNT_2: u64 = 87_654;
@@ -71,8 +76,8 @@
 // const TOKEN_OWNER_ADDRESS_2: Key = Key::Hash([42; 32]);
 // const TOKEN_OWNER_AMOUNT_2: u64 = 2_000_000;
 
-// // const METHOD_MINT: &str = "mint";
-// // const METHOD_BURN: &str = "burn";
+// const METHOD_MINT: &str = "mint";
+// const METHOD_BURN: &str = "burn";
 
 // /// Converts hash addr of Account into Hash, and Hash into Account
 // ///
@@ -95,7 +100,7 @@
 
 // fn setup() -> (InMemoryWasmTestBuilder, TestContext) {
 //     let mut builder = InMemoryWasmTestBuilder::default();
-//     builder.run_genesis(&*DEFAULT_RUN_GENESIS_REQUEST);
+//     builder.run_genesis(&*PRODUCTION_RUN_GENESIS_REQUEST);
 
 //     let id: Option<u64> = None;
 //     let transfer_1_args = runtime_args! {
@@ -196,7 +201,7 @@
 //         *DEFAULT_ACCOUNT_ADDR,
 //         erc1155_test_contract_hash,
 //         None,
-//         CHECK_TOTAL_SUPPLY_ENTRYPOINT,
+//         CHECK_TOTAL_SUPPLY_ENTRY_POINT_NAME,
 //         check_total_supply_args,
 //     )
 //     .build();
@@ -226,7 +231,7 @@
 //     builder: &mut InMemoryWasmTestBuilder,
 //     erc1155_contract_hash: &ContractHash,
 //     account: Key,
-//     id: String
+//     id: String,
 // ) -> U256 {
 //     let _account = builder
 //         .get_account(*DEFAULT_ACCOUNT_ADDR)
@@ -261,7 +266,7 @@
 //     builder: &mut InMemoryWasmTestBuilder,
 //     erc1155_contract_hash: &ContractHash,
 //     accounts: Vec<Key>,
-//     ids: Vec<String>
+//     ids: Vec<String>,
 // ) -> Vec<U256> {
 //     let _account = builder
 //         .get_account(*DEFAULT_ACCOUNT_ADDR)
@@ -337,7 +342,7 @@
 //     recipient1: Key,
 //     sender2: Key,
 //     recipient2: Key,
-//     id: String
+//     id: String,
 // ) {
 //     let TestContext { erc1155_token, .. } = test_context;
 
@@ -353,8 +358,13 @@
 //     let account_2_balance_before = erc1155_check_balance_of(builder, erc1155_token, recipient2, id);
 //     assert_eq!(account_2_balance_before, U256::zero());
 
-//     let token_transfer_request_1 =
-//         make_erc1155_safe_transfer_from_request(sender1, erc1155_token, recipient1, id, transfer_amount_1);
+//     let token_transfer_request_1 = make_erc1155_safe_transfer_from_request(
+//         sender1,
+//         erc1155_token,
+//         recipient1,
+//         id,
+//         transfer_amount_1,
+//     );
 
 //     builder
 //         .exec(token_transfer_request_1)
@@ -372,8 +382,13 @@
 //     );
 //     let sender_balance_before = sender_balance_after;
 
-//     let token_transfer_request_2 =
-//         make_erc1155_safe_transfer_from_request(sender2, erc1155_token, recipient2, id, transfer_amount_2);
+//     let token_transfer_request_2 = make_erc1155_safe_transfer_from_request(
+//         sender2,
+//         erc1155_token,
+//         recipient2,
+//         id,
+//         transfer_amount_2,
+//     );
 
 //     builder
 //         .exec(token_transfer_request_2)
@@ -475,7 +490,8 @@
 //     let account_is_approval_before = erc1155_check_is_approval_for_all(builder, account, operator);
 //     assert_eq!(account_is_approval_before, false);
 
-//     let approve_request = make_erc1155_set_approval_for_all_request(sender, erc1155_token, operator, true);
+//     let approve_request =
+//         make_erc1155_set_approval_for_all_request(sender, erc1155_token, operator, true);
 
 //     builder.exec(approve_request).expect_success().commit();
 
@@ -485,16 +501,16 @@
 //     // Swap Key::Account into Hash and other way
 //     let inverted_operator_key = invert_erc1155_address(operator);
 
-//     let inverted_operator_is_approval = erc1155_check_is_approval_for_all(builder, account, inverted_operator_key);
+//     let inverted_operator_is_approval =
+//         erc1155_check_is_approval_for_all(builder, account, inverted_operator_key);
 //     assert_eq!(inverted_operator_is_approval, false);
-
 // }
 
-//   #[test]
+// #[test]
 // fn should_have_queryable_properties() {
 //     let (mut builder, TestContext { erc1155_token, .. }) = setup();
 
-//     let name: String = builder.get_value(erc1155_token, NAME_KEY);
+//     let name: String = builder.get_value(erc1155_token, TEST_CONTRACT_KEY_NAME);
 //     assert_eq!(name, TOKEN_NAME);
 
 //     let symbol: String = builder.get_value(erc1155_token, SYMBOL_KEY);
@@ -511,8 +527,11 @@
 //     let owner_balance = erc1155_check_balance_of(&mut builder, &erc1155_token, owner_key);
 //     assert_eq!(owner_balance, total_supply);
 
-//     let contract_balance =
-//         erc1155_check_balance_of(&mut builder, &erc1155_token, Key::Hash(erc1155_token.value()));
+//     let contract_balance = erc1155_check_balance_of(
+//         &mut builder,
+//         &erc1155_token,
+//         Key::Hash(erc1155_token.value()),
+//     );
 //     assert_eq!(contract_balance, U256::zero());
 
 //     // Ensures that Account and Contract ownership is respected and we're not keying ownership under
@@ -628,14 +647,24 @@
 //     let (mut builder, TestContext { erc1155_token, .. }) = setup();
 //     let id = String::from("1");
 //     let transfer_1_sender = *DEFAULT_ACCOUNT_ADDR;
-//     let sender_balance_before = erc1155_check_balance_of(&mut builder, &erc1155_token, Key::Account(transfer_1_sender), id);
+//     let sender_balance_before = erc1155_check_balance_of(
+//         &mut builder,
+//         &erc1155_token,
+//         Key::Account(transfer_1_sender),
+//         id,
+//     );
 //     let erc1155_transfer_1_args = runtime_args! {
 //       ARG_RECIPIENT => Key::Account(*ACCOUNT_1_ADDR),
 //         ARG_TOKEN_ID => id,
 //         ARG_AMOUNT => sender_balance_before,
 //     };
 
-//     let account_1_balance_before = erc1155_check_balance_of(&mut builder, &erc1155_token, Key::Account(*ACCOUNT_1_ADDR), id);
+//     let account_1_balance_before = erc1155_check_balance_of(
+//         &mut builder,
+//         &erc1155_token,
+//         Key::Account(*ACCOUNT_1_ADDR),
+//         id,
+//     );
 //     assert_eq!(account_1_balance_before, U256::zero());
 
 //     let token_transfer_request_1 = ExecuteRequestBuilder::contract_call_by_hash(
@@ -651,8 +680,12 @@
 //         .expect_success()
 //         .commit();
 
-//     let account_1_balance_after =
-//         erc1155_check_balance_of(&mut builder, &erc1155_token, Key::Account(*ACCOUNT_1_ADDR), id);
+//     let account_1_balance_after = erc1155_check_balance_of(
+//         &mut builder,
+//         &erc1155_token,
+//         Key::Account(*ACCOUNT_1_ADDR),
+//         id,
+//     );
 //     assert_eq!(account_1_balance_after, sender_balance_before);
 
 //     let sender_balance_after = erc1155_check_balance_of(
@@ -687,7 +720,12 @@
 
 //     assert!(transfer_amount > sender_balance_before);
 
-//     let account_1_balance_before = erc1155_check_balance_of(&mut builder, &erc1155_token, Key::Account(*ACCOUNT_1_ADDR), id);
+//     let account_1_balance_before = erc1155_check_balance_of(
+//         &mut builder,
+//         &erc1155_token,
+//         Key::Account(*ACCOUNT_1_ADDR),
+//         id,
+//     );
 //     assert_eq!(account_1_balance_before, U256::zero());
 
 //     let token_transfer_request_1 = ExecuteRequestBuilder::contract_call_by_hash(
@@ -715,10 +753,13 @@
 //     );
 //     assert_eq!(account_1_balance_after, account_1_balance_before);
 
-//     let sender_balance_after =
-//         erc1155_check_balance_of(&mut builder, &erc1155_token, Key::Account(transfer_1_sender), id);
+//     let sender_balance_after = erc1155_check_balance_of(
+//         &mut builder,
+//         &erc1155_token,
+//         Key::Account(transfer_1_sender),
+//         id,
+//     );
 //     assert_eq!(sender_balance_after, sender_balance_before);
-
 // }
 
 // #[test]
@@ -788,12 +829,18 @@
 //     let transfer_amount = U256::from(TRANSFER_AMOUNT_1);
 
 //     let sender_balance_before = erc1155_check_balance_of(&mut builder, &erc1155_token, sender, id);
-//     let recipient_balance_before = erc1155_check_balance_of(&mut builder, &erc1155_token, recipient, id);
+//     let recipient_balance_before =
+//         erc1155_check_balance_of(&mut builder, &erc1155_token, recipient, id);
 
 //     assert_eq!(sender_balance_before, recipient_balance_before);
 
-//     let token_transfer_request_1 =
-//         make_erc1155_safe_transfer_from_request(sender, &erc1155_token, recipient, id, transfer_amount);
+//     let token_transfer_request_1 = make_erc1155_safe_transfer_from_request(
+//         sender,
+//         &erc1155_token,
+//         recipient,
+//         id,
+//         transfer_amount,
+//     );
 
 //     builder
 //         .exec(token_transfer_request_1)
@@ -803,7 +850,8 @@
 //     let sender_balance_after = erc1155_check_balance_of(&mut builder, &erc1155_token, sender, id);
 //     assert_eq!(sender_balance_before, sender_balance_after);
 
-//     let recipient_balance_after = erc1155_check_balance_of(&mut builder, &erc1155_token, recipient, id);
+//     let recipient_balance_after =
+//         erc1155_check_balance_of(&mut builder, &erc1155_token, recipient, id);
 //     assert_eq!(recipient_balance_before, recipient_balance_after);
 
 //     assert_eq!(sender_balance_after, recipient_balance_after);
@@ -819,10 +867,16 @@
 //     let transfer_amount = U256::zero();
 
 //     let sender_balance_before = erc1155_check_balance_of(&mut builder, &erc1155_token, sender, id);
-//     let recipient_balance_before = erc1155_check_balance_of(&mut builder, &erc1155_token, recipient, id);
+//     let recipient_balance_before =
+//         erc1155_check_balance_of(&mut builder, &erc1155_token, recipient, id);
 
-//     let token_transfer_request_1 =
-//         make_erc1155_safe_transfer_from_request(sender, &erc1155_token, recipient, id, transfer_amount);
+//     let token_transfer_request_1 = make_erc1155_safe_transfer_from_request(
+//         sender,
+//         &erc1155_token,
+//         recipient,
+//         id,
+//         transfer_amount,
+//     );
 
 //     builder
 //         .exec(token_transfer_request_1)
@@ -832,7 +886,8 @@
 //     let sender_balance_after = erc1155_check_balance_of(&mut builder, &erc1155_token, sender, id);
 //     assert_eq!(sender_balance_before, sender_balance_after);
 
-//     let recipient_balance_after = erc1155_check_balance_of(&mut builder, &erc1155_token, recipient, id);
+//     let recipient_balance_after =
+//         erc1155_check_balance_of(&mut builder, &erc1155_token, recipient, id);
 //     assert_eq!(recipient_balance_before, recipient_balance_after);
 // }
 
@@ -1074,7 +1129,7 @@
 //     let mint_request = ExecuteRequestBuilder::contract_call_by_hash(
 //         *DEFAULT_ACCOUNT_ADDR,
 //         test_contract,
-//         METHOD_MINT,
+//         METHOD_MIN,
 //         runtime_args! {
 //             ARG_OWNER => TOKEN_OWNER_ADDRESS_1,
 //             ARG_AMOUNT => mint_amount,
@@ -1222,7 +1277,8 @@
 //     let spender_allowance_before = erc1155_check_allowance_of(&mut builder, owner, spender);
 
 //     let sender_balance_before = erc1155_check_balance_of(&mut builder, &erc1155_token, sender);
-//     let recipient_balance_before = erc1155_check_balance_of(&mut builder, &erc1155_token, recipient);
+//     let recipient_balance_before =
+//         erc1155_check_balance_of(&mut builder, &erc1155_token, recipient);
 
 //     assert_eq!(sender_balance_before, recipient_balance_before);
 
