@@ -1,3 +1,7 @@
+fn main() {
+    panic!("Execute \"cargo test\" to test the contract, not \"cargo run\".");
+}
+
 #[cfg(test)]
 mod test_fixture;
 
@@ -9,7 +13,7 @@ mod tests {
     #[test]
     fn should_install() {
         let fixture = TestFixture::install_contract();
-        assert_eq!(fixture.token_uri(), TestFixture::URI);
+        assert_eq!(fixture.uri(), TestFixture::URI);
     }
 
     #[test]
@@ -133,14 +137,14 @@ mod tests {
         let approved_before = fixture
             .is_approval_for_all(Key::from(fixture.ali), Key::from(fixture.bob))
             .unwrap_or_default();
-        assert_eq!(approved_before, false);
+        assert!(!approved_before);
 
         fixture.set_approval_for_all(Key::from(fixture.bob), true, Sender(fixture.ali));
 
         let approved_after = fixture
             .is_approval_for_all(Key::from(fixture.ali), Key::from(fixture.bob))
             .unwrap();
-        assert_eq!(approved_after, true);
+        assert!(approved_after);
 
         fixture.safe_transfer_from(
             Key::from(fixture.ali),
@@ -169,13 +173,13 @@ mod tests {
         let approved_before = fixture
             .is_approval_for_all(Key::from(fixture.ali), Key::from(fixture.bob))
             .unwrap_or_default();
-        assert_eq!(approved_before, false);
+        assert!(!approved_before);
 
         fixture.set_approval_for_all(Key::from(fixture.bob), true, Sender(fixture.ali));
         let approved_after = fixture
             .is_approval_for_all(Key::from(fixture.ali), Key::from(fixture.bob))
             .unwrap();
-        assert_eq!(approved_after, true);
+        assert!(approved_after);
         // fixture.safe_transfer_from(Key::from(fixture.ali), Key::from(fixture.joe), id, transfer_amount, Sender(fixture.ali));
         //let balance_before = fixture.balance_of(Key::from(fixture.ali), id).unwrap_or_default();
         //assert_eq!(balance_before, mint_amount);
@@ -348,7 +352,4 @@ mod tests {
             Sender(fixture.ali),
         );
     }
-}
-fn main() {
-    panic!("Execute \"cargo test\" to test the contract, not \"cargo run\".");
 }

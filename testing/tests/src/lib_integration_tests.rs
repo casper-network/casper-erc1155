@@ -1,7 +1,7 @@
 // use once_cell::sync::Lazy;
 
 // use casper_engine_test_support::{
-//     internal::{ExecuteRequestBuilder, InMemoryWasmTestBuilder, DEFAULT_RUN_GENESIS_REQUEST},
+//     ExecuteRequestBuilder, InMemoryWasmTestBuilder, DEFAULT_RUN_GENESIS_REQUEST,
 //     DEFAULT_ACCOUNT_ADDR, MINIMUM_ACCOUNT_CREATION_BALANCE,
 // };
 // use casper_execution_engine::core::{
@@ -301,7 +301,7 @@
 //         .get_account(*DEFAULT_ACCOUNT_ADDR)
 //         .expect("should have account");
 //     let erc1155_contract_hash = account
-//         .named_keys()    
+//         .named_keys()
 //         .get(ERC1155_TOKEN_CONTRACT_KEY)
 //         .and_then(|key| key.into_hash())
 //         .map(ContractHash::new)
@@ -490,7 +490,6 @@
 
 // }
 
-// {
 //   #[test]
 // fn should_have_queryable_properties() {
 //     let (mut builder, TestContext { erc1155_token, .. }) = setup();
@@ -635,7 +634,7 @@
 //         ARG_TOKEN_ID => id,
 //         ARG_AMOUNT => sender_balance_before,
 //     };
-    
+
 //     let account_1_balance_before = erc1155_check_balance_of(&mut builder, &erc1155_token, Key::Account(*ACCOUNT_1_ADDR), id);
 //     assert_eq!(account_1_balance_before, U256::zero());
 
@@ -720,7 +719,7 @@
 //         erc1155_check_balance_of(&mut builder, &erc1155_token, Key::Account(transfer_1_sender), id);
 //     assert_eq!(sender_balance_after, sender_balance_before);
 
-//}
+// }
 
 // #[test]
 // fn should_set_approval_for_all_account_to_account() {
@@ -777,7 +776,7 @@
 //         Key::Hash(erc1155_test_call.value()),
 //         Key::Hash([42; 32]),
 //     );
-//}
+// }
 
 // #[test]
 // fn should_have_correct_balance_after_own_transfer() {
@@ -836,7 +835,6 @@
 //     let recipient_balance_after = erc1155_check_balance_of(&mut builder, &erc1155_token, recipient, id);
 //     assert_eq!(recipient_balance_before, recipient_balance_after);
 // }
-
 
 // #[test]
 // fn should_not_transfer_from_without_enough_allowance() {

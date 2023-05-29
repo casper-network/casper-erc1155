@@ -26,12 +26,10 @@ mod total_supply;
 
 use alloc::string::{String, ToString};
 use alloc::vec::Vec;
+use casper_contract::contract_api::runtime;
 use once_cell::unsync::OnceCell;
 
-use casper_contract::{
-    contract_api::{runtime, storage},
-    unwrap_or_revert::UnwrapOrRevert,
-};
+use casper_contract::{contract_api::storage, unwrap_or_revert::UnwrapOrRevert};
 use casper_types::{contracts::NamedKeys, EntryPoints, Key, URef, U256};
 
 pub use address::Address;
@@ -52,9 +50,9 @@ pub struct ERC1155 {
 impl ERC1155 {
     fn new(balances_uref: URef, operators_uref: URef, total_supply_uref: URef) -> Self {
         Self {
-            balances_uref: balances_uref.into(),
-            operators_uref: operators_uref.into(),
-            total_supply_uref: total_supply_uref.into(),
+            balances_uref: OnceCell::from(balances_uref),
+            operators_uref: OnceCell::from(operators_uref),
+            total_supply_uref: OnceCell::from(total_supply_uref),
         }
     }
 
@@ -73,19 +71,19 @@ impl ERC1155 {
     }
 
     fn read_total_supply(&self, id: &str) -> U256 {
-        total_supply::read_total_supply_from(self.total_supply_uref(), &id)
+        total_supply::read_total_supply_from(self.total_supply_uref(), id)
     }
 
     fn write_total_supply(&self, id: &str, amount: U256) {
-        total_supply::write_total_supply_to(self.total_supply_uref(), &id, amount)
+        total_supply::write_total_supply_to(self.total_supply_uref(), id, amount)
     }
 
     fn read_balance(&self, account: Address, token_id: &str) -> U256 {
-        balances::read_balance_from(self.balances_uref(), account, &token_id)
+        balances::read_balance_from(self.balances_uref(), account, token_id)
     }
 
     fn write_balance(&mut self, to: Address, token_id: &str, amount: U256) {
-        balances::write_balance_to(self.balances_uref(), to, &token_id, amount)
+        balances::write_balance_to(self.balances_uref(), to, token_id, amount)
     }
 
     fn read_operator(&self, owner: Address, spender: Address) -> bool {
@@ -111,7 +109,7 @@ impl ERC1155 {
 
     /// Returns the total supply of the token.
     pub fn total_supply(&self, id: &str) -> U256 {
-        self.read_total_supply(&id)
+        self.read_total_supply(id)
     }
 
     /// Returns the balance of `account`.
@@ -154,20 +152,20 @@ impl ERC1155 {
         let spender = detail::get_immediate_caller_address()?;
         let operator = self.read_operator(from, spender);
         if (from != spender && !operator) || amount == U256::zero() || from == to {
-            return Ok(());
+            Ok(())
         } else {
             let sender_balance = {
-                let balance = self.read_balance(from, &id);
+                let balance = self.read_balance(from, id);
                 balance
                     .checked_sub(amount)
                     .ok_or(Error::InsufficientBalance)?
             };
             let recipient_balance = {
-                let balance = self.read_balance(to, &id);
+                let balance = self.read_balance(to, id);
                 balance.checked_add(amount).ok_or(Error::Overflow)?
             };
-            self.write_balance(from, &id, sender_balance);
-            self.write_balance(to, &id, recipient_balance);
+            self.write_balance(from, id, sender_balance);
+            self.write_balance(to, id, recipient_balance);
             Ok(())
         }
     }
@@ -183,7 +181,7 @@ impl ERC1155 {
         let spender = detail::get_immediate_caller_address()?;
         let operator = self.read_operator(from, spender);
         if (from != spender && !operator) || from == to {
-            return Ok(());
+            Ok(())
         } else {
             for (i, _) in ids.iter().enumerate() {
                 let sender_balance = {
@@ -209,15 +207,15 @@ impl ERC1155 {
     /// public entry point.
     pub fn mint(&mut self, to: Address, id: &str, amount: U256) -> Result<(), Error> {
         let new_balance = {
-            let balance = self.read_balance(to, &id);
+            let balance = self.read_balance(to, id);
             balance.checked_add(amount).ok_or(Error::Overflow)?
         };
         let new_total_supply = {
-            let total_supply = self.read_total_supply(&id);
+            let total_supply = self.read_total_supply(id);
             total_supply.checked_add(amount).ok_or(Error::Overflow)?
         };
-        self.write_balance(to, &id, new_balance);
-        self.write_total_supply(&id, new_total_supply);
+        self.write_balance(to, id, new_balance);
+        self.write_total_supply(id, new_total_supply);
         Ok(())
     }
 
@@ -227,17 +225,17 @@ impl ERC1155 {
     /// public entry point.
     pub fn burn(&mut self, owner: Address, id: &str, amount: U256) -> Result<(), Error> {
         let new_balance = {
-            let balance = self.read_balance(owner, &id);
+            let balance = self.read_balance(owner, id);
             balance
                 .checked_sub(amount)
                 .ok_or(Error::InsufficientBalance)?
         };
         let new_total_supply = {
-            let total_supply = self.read_total_supply(&id);
+            let total_supply = self.read_total_supply(id);
             total_supply.checked_sub(amount).ok_or(Error::Overflow)?
         };
-        self.write_balance(owner, &id, new_balance);
-        self.write_total_supply(&id, new_total_supply);
+        self.write_balance(owner, id, new_balance);
+        self.write_total_supply(id, new_total_supply);
         Ok(())
     }
 

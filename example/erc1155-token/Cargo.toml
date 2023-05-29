@@ -5,9 +5,9 @@ version = "0.1.0"
 edition = "2018"
 
 [dependencies]
-casper-contract = "1.3.2"
+casper-contract = "2.0.0"
+casper-types = { version = "2.0.0", default-features = false }
 casper-erc1155 = { path = "../../erc1155" }
-casper-types = "1.3.2"
 
 [[bin]]
 name = "erc1155_token"

@@ -21,8 +21,8 @@ use casper_erc1155::{
     Address, Error, ERC1155,
 };
 use casper_types::{
-    account::AccountHash, CLType, CLTyped, ContractPackageHash, CLValue, EntryPoint, EntryPointAccess, EntryPointType,
-    EntryPoints, Parameter, U256,
+    account::AccountHash, CLType, CLTyped, CLValue, ContractPackageHash, EntryPoint,
+    EntryPointAccess, EntryPointType, EntryPoints, Parameter, U256,
 };
 
 // const MINT_ENTRY_POINT_NAME: &str = "mint";

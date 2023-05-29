@@ -15,8 +15,8 @@ use casper_contract::{
 };
 use casper_erc1155::{
     constants::{
-        ACCOUNTS_RUNTIME_ARG_NAME, ACCOUNT_RUNTIME_ARG_NAME, AMOUNT_RUNTIME_ARG_NAME,
-        AMOUNTS_RUNTIME_ARG_NAME, APPROVED_RUNTIME_ARG_NAME, OPERATOR_RUNTIME_ARG_NAME,
+        ACCOUNTS_RUNTIME_ARG_NAME, ACCOUNT_RUNTIME_ARG_NAME, AMOUNTS_RUNTIME_ARG_NAME,
+        AMOUNT_RUNTIME_ARG_NAME, APPROVED_RUNTIME_ARG_NAME, OPERATOR_RUNTIME_ARG_NAME,
         RECIPIENT_RUNTIME_ARG_NAME, SAFE_BATCH_TRANSFER_FROM_ENTRY_POINT_NAME,
         SAFE_TRANSFER_FROM_ENTRY_POINT_NAME, SET_APPROVAL_FOR_ALL_ENTRY_POINT_NAME,
         TOKEN_IDS_RUNTIME_ARG_NAME, TOKEN_ID_RUNTIME_ARG_NAME,
@@ -58,7 +58,7 @@ extern "C" fn check_total_supply() {
     let token_contract: ContractHash = runtime::get_named_arg(TOKEN_CONTRACT_RUNTIME_ARG_NAME);
     let id: String = runtime::get_named_arg(TOKEN_ID_RUNTIME_ARG_NAME);
     let total_supply_arg = runtime_args! {
-      casper_erc1155::constants::TOKEN_ID_RUNTIME_ARG_NAME => id,
+        casper_erc1155::constants::TOKEN_ID_RUNTIME_ARG_NAME => id,
     };
     let total_supply: U256 = runtime::call_contract(
         token_contract,
@@ -184,9 +184,9 @@ pub extern "C" fn call() {
     let check_total_supply_entrypoint = EntryPoint::new(
         String::from(CHECK_TOTAL_SUPPLY_ENTRY_POINT_NAME),
         vec![
-          Parameter::new(TOKEN_CONTRACT_RUNTIME_ARG_NAME, ContractHash::cl_type()),
-          Parameter::new(TOKEN_ID_RUNTIME_ARG_NAME, String::cl_type()),
-          ],
+            Parameter::new(TOKEN_CONTRACT_RUNTIME_ARG_NAME, ContractHash::cl_type()),
+            Parameter::new(TOKEN_ID_RUNTIME_ARG_NAME, String::cl_type()),
+        ],
         <()>::cl_type(),
         EntryPointAccess::Public,
         EntryPointType::Contract,

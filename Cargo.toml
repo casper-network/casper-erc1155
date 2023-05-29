@@ -12,7 +12,7 @@ default-members = [
     "testing/tests",
     "testing/erc1155-test",
     "testing/erc1155-test-call",
-    "example/erc1155-tests"
+    "example/erc1155-tests",
 ]
 
 [profile.release]

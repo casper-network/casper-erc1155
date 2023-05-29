@@ -61,4 +61,3 @@ pub(crate) fn get_immediate_caller_address() -> Result<Address, Error> {
         .map(call_stack_element_to_address)
         .ok_or(Error::InvalidContext)
 }
-
