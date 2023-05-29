@@ -313,16 +313,17 @@ fn get_dictionary_value_from_key<T: CLTyped + FromBytes>(
         .expect("must convert to seed uref");
     let result = builder.query_dictionary_item(None, seed_uref, dictionary_key);
 
-    if result.is_err() {
-        return None;
-    }
-
-    let value = result
-        .expect("should have dictionary value")
-        .as_cl_value()
-        .expect("T should be CLValue")
-        .to_owned()
-        .into_t()
-        .unwrap();
-    Some(value)
+    return if result.is_err() {
+        None
+    } else {
+        Some(
+            result
+                .expect("should have dictionary value")
+                .as_cl_value()
+                .expect("T should be CLValue")
+                .to_owned()
+                .into_t()
+                .unwrap(),
+        )
+    };
 }
